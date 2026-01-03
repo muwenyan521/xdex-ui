@@ -324,10 +324,10 @@ async function displayTitleScreen() {
     }
     initGraphicalErrorHandling();
     initSystemInformationProxy();
-    waitForFonts().then(() => {
+    // waitForFonts().then(() => {
         bootScreen.remove();
         initUI();
-    });
+    // });
 }
 
 // Returns the user's desired display name
