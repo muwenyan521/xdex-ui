@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Cache node modules
         uses: actions/cache@v4
@@ -24,7 +26,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-electron-
 
-      - name: Install system dependencies for x64->x32 cross-build
+      - name: Install system dependencies
         run: |
           sudo apt update
           sudo apt install -y libc6-dev-i386 gcc-multilib g++-multilib
@@ -35,14 +37,14 @@ jobs:
           node-version: 18
           cache: 'npm'
 
-      - name: Install build deps
+      - name: Install dependencies
         run: npm ci
 
       - name: Run prebuild script
         run: npm run prebuild-linux
 
-      - name: Build for x64 / ia32
-        run: npx electron-builder build -l --x64 --ia32
+      - name: Build for Linux
+        run: npm run build-linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,6 +58,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -78,14 +82,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-electron-
 
-      - name: Run prebuild outside of QEMU emulator
+      - name: Prebuild on host (x64)
         run: |
           npm ci
           rsync -a --info=progress2 src/ prebuild-src --exclude node_modules
           node prebuild-minify.js
           rm -rf node_modules
 
-      - name: Build for arm32v7 (aka armv7l)
+      - name: Build for ARM32
         uses: docker://arm32v7/node:18-bullseye
         with:
           args: bash -c "npm ci && npx electron-builder build -l --armv7l"
@@ -102,6 +106,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -124,14 +130,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-electron-
 
-      - name: Run prebuild outside of QEMU emulator
+      - name: Prebuild on host (x64)
         run: |
           npm ci
           rsync -a --info=progress2 src/ prebuild-src --exclude node_modules
           node prebuild-minify.js
           rm -rf node_modules
 
-      - name: Build for arm64 (aka arm64v8)
+      - name: Build for ARM64
         uses: docker://arm64v8/node:18-bullseye
         with:
           args: bash -c "npm ci && npx electron-builder build -l --arm64"
@@ -148,6 +154,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Cache node modules
         uses: actions/cache@v4
@@ -189,6 +197,8 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Cache node modules
         uses: actions/cache@v4
